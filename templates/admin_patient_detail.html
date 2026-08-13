@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Details - CBT Companion Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        secondary: '#10B981',
+                        danger: '#EF4444',
+                        warning: '#F59E0B',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-xl transform -translate-x-full transition-transform duration-300 lg:relative lg:translate-x-0">
+            <!-- Logo -->
+            <div class="flex items-center justify-between h-16 px-6 border-b border-gray-200">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+                        <img src="data:image/png;base64,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" alt="CBT Companion Logo" class="w-6 h-6 object-contain">
+                    </div>
+                    <span class="text-lg font-bold text-gray-800">CBT Admin</span>
+                </div>
+                <button id="close-sidebar" class="lg:hidden p-2 rounded-lg hover:bg-gray-100">
+                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Navigation -->
+            <nav class="px-4 py-6 space-y-2">
+                <a href="/admin/dashboard" class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                    </svg>
+                    Dashboard
+                </a>
+                <a href="/admin/patients" class="flex items-center px-4 py-3 text-blue-600 bg-blue-50 rounded-lg">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                    </svg>
+                    Patients
+                </a>
+            </nav>
+
+            <!-- User Info -->
+            <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
+                        <span id="admin-initials" class="text-white font-semibold text-sm">AD</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p id="admin-name" class="text-sm font-medium text-gray-900 truncate">Admin</p>
+                        <p id="admin-email" class="text-xs text-gray-500 truncate">admin@example.com</p>
+                    </div>
+                    <button id="logout-btn" class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Logout">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Sidebar Overlay -->
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden hidden"></div>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto">
+
+            <!-- Top Bar -->
+            <header class="bg-white shadow-sm sticky top-0 z-30">
+                <div class="flex items-center justify-between h-16 px-6">
+                    <div class="flex items-center space-x-4">
+                        <button id="open-sidebar" class="lg:hidden p-2 rounded-lg hover:bg-gray-100">
+                            <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                            </svg>
+                        </button>
+                        <a href="/admin/patients" class="text-gray-400 hover:text-gray-600">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                            </svg>
+                        </a>
+                        <h1 class="text-xl font-semibold text-gray-800">Patient Details</h1>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Loading State -->
+            <div id="loading-state" class="flex items-center justify-center h-64">
+                <svg class="animate-spin h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+            </div>
+
+            <!-- Patient Content (hidden until loaded) -->
+            <div id="patient-content" class="hidden p-6 space-y-6">
+                <!-- Patient Header -->
+                <div id="patient-header-card" class="bg-white rounded-xl shadow-sm p-6">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                        <div class="flex items-center space-x-4">
+                            <div id="patient-avatar" class="w-16 h-16 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full flex items-center justify-center">
+                                <span id="patient-initials" class="text-white font-bold text-xl">--</span>
+                            </div>
+                            <div>
+                                <div class="flex items-center space-x-2">
+                                    <h2 id="patient-name" class="text-2xl font-bold text-gray-800">Loading...</h2>
+                                    <span id="risk-badge" class="hidden px-2 py-0.5 text-xs font-semibold rounded-full"></span>
+                                </div>
+                                <p id="patient-email" class="text-gray-500">loading@example.com</p>
+                                <p id="patient-member-since" class="text-sm text-gray-400 mt-1">Member since --</p>
+                            </div>
+                        </div>
+                        <div class="mt-4 md:mt-0 flex flex-wrap gap-4">
+                            <div class="text-center px-4 py-2 bg-blue-50 rounded-lg">
+                                <p id="stat-sessions" class="text-2xl font-bold text-blue-600">-</p>
+                                <p class="text-xs text-gray-500">Sessions</p>
+                            </div>
+                            <div class="text-center px-4 py-2 bg-green-50 rounded-lg">
+                                <p id="stat-exercises" class="text-2xl font-bold text-green-600">-</p>
+                                <p class="text-xs text-gray-500">Exercises</p>
+                            </div>
+                            <div class="text-center px-4 py-2 bg-purple-50 rounded-lg">
+                                <p id="stat-streak" class="text-2xl font-bold text-purple-600">-</p>
+                                <p class="text-xs text-gray-500">Day Streak</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabs -->
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                    <div class="border-b border-gray-200">
+                        <nav class="flex -mb-px overflow-x-auto">
+                            <button class="tab-btn active px-6 py-4 text-sm font-medium border-b-2 whitespace-nowrap" data-tab="overview">
+                                Overview
+                            </button>
+                            <button class="tab-btn px-6 py-4 text-sm font-medium border-b-2 whitespace-nowrap" data-tab="vitals">
+                                Vitals
+                            </button>
+                            <button class="tab-btn px-6 py-4 text-sm font-medium border-b-2 whitespace-nowrap" data-tab="sessions">
+                                Sessions
+                            </button>
+                            <button class="tab-btn px-6 py-4 text-sm font-medium border-b-2 whitespace-nowrap" data-tab="crisis">
+                                Crisis History
+                            </button>
+                            <button class="tab-btn px-6 py-4 text-sm font-medium border-b-2 whitespace-nowrap" data-tab="ml">
+                                ML Predictions
+                            </button>
+                        </nav>
+                    </div>
+
+                    <!-- Tab Content -->
+                    <div class="p-6">
+                        <!-- Overview Tab -->
+                        <div id="tab-overview" class="tab-content">
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <!-- Distortion Pattern Radar Chart -->
+                                <div class="bg-gray-50 rounded-lg p-4">
+                                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Distortion Pattern</h3>
+                                    <div class="h-64">
+                                        <canvas id="distortionRadarChart"></canvas>
+                                    </div>
+                                </div>
+
+                                <!-- Mood Tracking Line Chart -->
+                                <div class="bg-gray-50 rounded-lg p-4">
+                                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Mood Tracking</h3>
+                                    <div class="h-64">
+                                        <canvas id="moodChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Distortion Legend -->
+                            <div class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div class="bg-blue-50 p-4 rounded-lg">
+                                    <h4 class="font-semibold text-blue-700">G1: Binary Thinking</h4>
+                                    <p class="text-sm text-gray-600 mt-1">All-or-nothing, black-and-white patterns</p>
+                                </div>
+                                <div class="bg-green-50 p-4 rounded-lg">
+                                    <h4 class="font-semibold text-green-700">G2: Overgeneralization</h4>
+                                    <p class="text-sm text-gray-600 mt-1">Broad conclusions from single events</p>
+                                </div>
+                                <div class="bg-yellow-50 p-4 rounded-lg">
+                                    <h4 class="font-semibold text-yellow-700">G3: Attention Bias</h4>
+                                    <p class="text-sm text-gray-600 mt-1">Focus on negatives, filtering positives</p>
+                                </div>
+                                <div class="bg-red-50 p-4 rounded-lg">
+                                    <h4 class="font-semibold text-red-700">G4: Emotion-Driven</h4>
+                                    <p class="text-sm text-gray-600 mt-1">Feelings treated as facts</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Vitals Tab -->
+                        <div id="tab-vitals" class="tab-content hidden">
+                            <div class="flex justify-end mb-4 gap-2">
+                                <button id="new-participant-btn" class="flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors">
+                                    Start New Participant
+                                </button>
+                                <button id="export-vitals-btn" class="flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
+                                    Export Vitals CSV
+                                </button>
+                            </div>
+                            <!-- Current Readings -->
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                                <div class="bg-red-50 rounded-lg p-4">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <p class="text-sm text-gray-500">Heart Rate (PPG)</p>
+                                            <p id="vital-ppg" class="text-2xl font-bold text-red-600">--</p>
+                                        </div>
+                                        <svg class="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                                        </svg>
+                                    </div>
+                                    <p id="vital-ppg-time" class="text-xs text-gray-400 mt-2">Last updated: --</p>
+                                </div>
+                                <div class="bg-blue-50 rounded-lg p-4">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <p class="text-sm text-gray-500">Skin Conductance (GSR)</p>
+                                            <p id="vital-gsr" class="text-2xl font-bold text-blue-600">--</p>
+                                        </div>
+                                        <svg class="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                        </svg>
+                                    </div>
+                                    <p id="vital-gsr-time" class="text-xs text-gray-400 mt-2">Last updated: --</p>
+                                </div>
+                                <div class="bg-green-50 rounded-lg p-4">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <p class="text-sm text-gray-500">Activity Level</p>
+                                            <p id="vital-activity" class="text-2xl font-bold text-green-600">--</p>
+                                        </div>
+                                        <svg class="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                                        </svg>
+                                    </div>
+                                    <p id="vital-activity-time" class="text-xs text-gray-400 mt-2">X: -- Y: -- Z: --</p>
+                                </div>
+                            </div>
+
+                            <!-- Vitals Charts -->
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <div class="bg-gray-50 rounded-lg p-4">
+                                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Heart Rate Trend (24h)</h3>
+                                    <div class="h-64">
+                                        <canvas id="ppgChart"></canvas>
+                                    </div>
+                                </div>
+                                <div class="bg-gray-50 rounded-lg p-4">
+                                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Skin Conductance (24h)</h3>
+                                    <div class="h-64">
+                                        <canvas id="gsrChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Vitals Summary Table -->
+                            <div class="mt-6 bg-gray-50 rounded-lg p-4">
+                                <h3 class="text-lg font-semibold text-gray-800 mb-4">Vitals Summary</h3>
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full">
+                                        <thead>
+                                            <tr class="border-b border-gray-200">
+                                                <th class="text-left py-2 text-sm font-medium text-gray-500">Metric</th>
+                                                <th class="text-center py-2 text-sm font-medium text-gray-500">Min</th>
+                                                <th class="text-center py-2 text-sm font-medium text-gray-500">Avg</th>
+                                                <th class="text-center py-2 text-sm font-medium text-gray-500">Max</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="vitals-summary-body">
+                                            <tr>
+                                                <td colspan="4" class="py-4 text-center text-gray-500">Loading...</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sessions Tab -->
+                        <div id="tab-sessions" class="tab-content hidden">
+                            <div id="sessions-timeline" class="space-y-4">
+                                <!-- Sessions will be populated here -->
+                                <div class="text-center text-gray-500 py-8">Loading sessions...</div>
+                            </div>
+                        </div>
+
+                        <!-- ML Predictions Tab -->
+                        <div id="tab-ml" class="tab-content hidden">
+
+                            <!-- Active Episode Banner (shown only if active) -->
+                            <div id="active-episode-banner" class="hidden mb-6 bg-orange-50 border border-orange-300 rounded-lg p-4">
+                                <div class="flex items-start space-x-3">
+                                    <svg class="w-6 h-6 text-orange-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                    </svg>
+                                    <div>
+                                        <p class="font-semibold text-orange-800">Active Risk Episode</p>
+                                        <p id="episode-detail" class="text-sm text-orange-700 mt-1">Loading...</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Summary cards -->
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                                <div class="bg-green-50 rounded-lg p-4 text-center">
+                                    <p class="text-sm text-gray-500">Normal</p>
+                                    <p id="ml-count-normal" class="text-2xl font-bold text-green-600">--</p>
+                                    <p class="text-xs text-gray-400">predictions</p>
+                                </div>
+                                <div class="bg-yellow-50 rounded-lg p-4 text-center">
+                                    <p class="text-sm text-gray-500">Mild Stress</p>
+                                    <p id="ml-count-mild" class="text-2xl font-bold text-yellow-600">--</p>
+                                    <p class="text-xs text-gray-400">predictions</p>
+                                </div>
+                                <div class="bg-red-50 rounded-lg p-4 text-center">
+                                    <p class="text-sm text-gray-500">High Stress</p>
+                                    <p id="ml-count-high" class="text-2xl font-bold text-red-600">--</p>
+                                    <p class="text-xs text-gray-400">predictions</p>
+                                </div>
+                            </div>
+
+                            <!-- Risk level over time chart -->
+                            <div class="bg-gray-50 rounded-lg p-4 mb-6">
+                                <h3 class="text-lg font-semibold text-gray-800 mb-1">Risk Level Over Time</h3>
+                                <p class="text-xs text-gray-400 mb-4">Green = Normal · Yellow = Mild Stress · Red = High Stress</p>
+                                <div class="h-72">
+                                    <canvas id="mlRiskChart"></canvas>
+                                </div>
+                            </div>
+
+                            <!-- Confidence over time chart -->
+                            <div class="bg-gray-50 rounded-lg p-4">
+                                <h3 class="text-lg font-semibold text-gray-800 mb-1">Model Confidence Over Time</h3>
+                                <p class="text-xs text-gray-400 mb-4">Predictions below 55% confidence are not counted as alerts</p>
+                                <div class="h-64">
+                                    <canvas id="mlConfidenceChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Crisis History Tab -->
+                        <div id="tab-crisis" class="tab-content hidden">
+                            <div id="crisis-history" class="space-y-4">
+                                <!-- Crisis history will be populated here -->
+                                <div class="text-center text-gray-500 py-8">Loading crisis history...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed bottom-4 right-4 z-50 space-y-2"></div>
+
+    <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+    <script>
+        const userId = '{{ user_id }}';
+        let patientData = null;
+        let distortionRadarChart = null;
+        let moodChart = null;
+        let ppgChart = null;
+        let gsrChart = null;
+        let mlRiskChart = null;
+        let mlConfidenceChart = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check authentication
+            if (!AdminPanel.isAuthenticated()) {
+                window.location.href = '/admin/login';
+                return;
+            }
+
+            // Set admin user info
+            const user = AdminPanel.getUser();
+            if (user) {
+                document.getElementById('admin-name').textContent = user.name;
+                document.getElementById('admin-email').textContent = user.email;
+                document.getElementById('admin-initials').textContent = user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+            }
+
+            // Load patient data
+            loadPatientData();
+
+            // Setup event listeners
+            setupEventListeners();
+        });
+
+        async function loadPatientData() {
+            try {
+                patientData = await AdminPanel.fetchAPI(`/admin/api/patients/${userId}`);
+
+                // Update header
+                document.getElementById('patient-name').textContent = patientData.name;
+                document.getElementById('patient-email').textContent = patientData.email;
+                document.getElementById('patient-initials').textContent = patientData.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+                document.getElementById('patient-member-since').textContent = `Member since ${AdminPanel.formatDate(patientData.created_at)}`;
+
+                // Update stats
+                document.getElementById('stat-sessions').textContent = patientData.stats.total_sessions;
+                document.getElementById('stat-exercises').textContent = patientData.stats.total_exercises;
+                document.getElementById('stat-streak').textContent = patientData.stats.current_streak;
+
+                // Risk badge in header
+                const depStats = patientData.depression_stats || {};
+                const activeEp = patientData.recent_episodes?.find(e => e.is_active);
+                const badge = document.getElementById('risk-badge');
+                if (activeEp) {
+                    const peakRisk = activeEp.peak_risk_level ?? 1;
+                    if (peakRisk >= 2) {
+                        badge.textContent = '⚠ HIGH STRESS';
+                        badge.className = 'px-2 py-0.5 text-xs font-semibold rounded-full bg-red-100 text-red-700';
+                    } else {
+                        badge.textContent = '⚠ MILD STRESS';
+                        badge.className = 'px-2 py-0.5 text-xs font-semibold rounded-full bg-orange-100 text-orange-700';
+                    }
+                    badge.classList.remove('hidden');
+                    // Highlight header card border
+                    document.getElementById('patient-header-card').classList.add('border-l-4', peakRisk >= 2 ? 'border-red-400' : 'border-orange-400');
+                }
+
+                // Show content
+                document.getElementById('loading-state').classList.add('hidden');
+                document.getElementById('patient-content').classList.remove('hidden');
+
+                // Load charts
+                loadDistortionRadarChart();
+                loadMoodChart();
+                loadVitalsData();
+                loadSessionsTimeline();
+                loadCrisisHistory();
+                loadMLPredictions();
+
+            } catch (error) {
+                console.error('Error loading patient:', error);
+                AdminPanel.showToast('Failed to load patient data', 'error');
+            }
+        }
+
+        function loadDistortionRadarChart() {
+            const ctx = document.getElementById('distortionRadarChart').getContext('2d');
+            const pattern = patientData.distortion_pattern;
+
+            if (distortionRadarChart) distortionRadarChart.destroy();
+
+            distortionRadarChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Binary Thinking (G1)', 'Overgeneralization (G2)', 'Attention Bias (G3)', 'Emotion-Driven (G4)'],
+                    datasets: [{
+                        label: 'Occurrences',
+                        data: [pattern.G1, pattern.G2, pattern.G3, pattern.G4],
+                        backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                        borderColor: '#3B82F6',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#3B82F6',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 1 }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        function loadMoodChart() {
+            const ctx = document.getElementById('moodChart').getContext('2d');
+            const moodHistory = patientData.mood_history || [];
+
+            if (moodChart) moodChart.destroy();
+
+            const labels = moodHistory.map(m => AdminPanel.formatDate(m.date));
+            const moodStart = moodHistory.map(m => m.mood_start);
+            const moodEnd = moodHistory.map(m => m.mood_end);
+
+            moodChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Mood Start',
+                            data: moodStart,
+                            borderColor: '#EF4444',
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            tension: 0.4,
+                            fill: false
+                        },
+                        {
+                            label: 'Mood End',
+                            data: moodEnd,
+                            borderColor: '#10B981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            tension: 0.4,
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 10,
+                            title: { display: true, text: 'Mood Level' }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        }
+                    }
+                }
+            });
+        }
+
+        async function loadVitalsData() {
+            try {
+                const vitalsData = await AdminPanel.fetchAPI(`/admin/api/charts/vitals/${userId}?hours=24`);
+                const summary = patientData.wearable_summary;
+
+                // Update current readings
+                if (summary.latest) {
+                    document.getElementById('vital-ppg').textContent = summary.latest.ppg.toFixed(1);
+                    document.getElementById('vital-gsr').textContent = summary.latest.gsr.toFixed(4);
+                    const magnitude = Math.sqrt(
+                        Math.pow(summary.latest.acc_x, 2) +
+                        Math.pow(summary.latest.acc_y, 2) +
+                        Math.pow(summary.latest.acc_z, 2)
+                    ).toFixed(2);
+                    document.getElementById('vital-activity').textContent = magnitude;
+                    document.getElementById('vital-ppg-time').textContent = `Last updated: ${AdminPanel.formatTimeAgo(summary.latest.recorded_at)}`;
+                    document.getElementById('vital-gsr-time').textContent = `Last updated: ${AdminPanel.formatTimeAgo(summary.latest.recorded_at)}`;
+                    document.getElementById('vital-activity-time').textContent = `X: ${summary.latest.acc_x.toFixed(2)} Y: ${summary.latest.acc_y.toFixed(2)} Z: ${summary.latest.acc_z.toFixed(2)}`;
+                }
+
+                // Update summary table
+                const dayStats = summary.day;
+                const summaryBody = document.getElementById('vitals-summary-body');
+                summaryBody.innerHTML = `
+                    <tr class="border-b border-gray-100">
+                        <td class="py-2 text-sm text-gray-900">Heart Rate (PPG)</td>
+                        <td class="py-2 text-sm text-center text-gray-600">${dayStats.ppg.min ?? '--'}</td>
+                        <td class="py-2 text-sm text-center text-gray-600">${dayStats.ppg.avg ?? '--'}</td>
+                        <td class="py-2 text-sm text-center text-gray-600">${dayStats.ppg.max ?? '--'}</td>
+                    </tr>
+                    <tr class="border-b border-gray-100">
+                        <td class="py-2 text-sm text-gray-900">Skin Conductance (GSR)</td>
+                        <td class="py-2 text-sm text-center text-gray-600">${dayStats.gsr.min ?? '--'}</td>
+                        <td class="py-2 text-sm text-center text-gray-600">${dayStats.gsr.avg ?? '--'}</td>
+                        <td class="py-2 text-sm text-center text-gray-600">${dayStats.gsr.max ?? '--'}</td>
+                    </tr>
+                    <tr>
+                        <td class="py-2 text-sm text-gray-900">Readings (24h)</td>
+                        <td colspan="3" class="py-2 text-sm text-center text-gray-600">${dayStats.reading_count} readings</td>
+                    </tr>
+                `;
+
+                // Load charts
+                loadPPGChart(vitalsData.data);
+                loadGSRChart(vitalsData.data);
+
+                // Store raw readings for CSV export
+                window.currentVitalsData = vitalsData.data;
+
+            } catch (error) {
+                console.error('Error loading vitals:', error);
+            }
+        }
+
+        async function startNewParticipant() {
+            const label = prompt('Enter a label for this new participant (e.g. "Participant 3"):');
+            if (!label || !label.trim()) return;
+
+            try {
+                await AdminPanel.fetchAPI(`/admin/api/markers/${userId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ label: label.trim() })
+                });
+                AdminPanel.showToast(`Marked start of "${label.trim()}" — begin taking readings now`, 'success');
+            } catch (error) {
+                console.error('Error creating marker:', error);
+                AdminPanel.showToast('Failed to start new participant marker', 'error');
+            }
+        }
+
+        function findLabelForTimestamp(recordedAt, markers) {
+            // markers is sorted oldest -> newest; find the latest marker at or before this reading's time
+            let label = 'Unlabeled';
+            for (const m of markers) {
+                if (m.created_at <= recordedAt) {
+                    label = m.label;
+                } else {
+                    break;
+                }
+            }
+            return label;
+        }
+
+        async function exportVitalsCSV() {
+            try {
+                AdminPanel.showToast('Fetching all readings...', 'info');
+                // Use a very large hours window to effectively get ALL historical readings
+                // (charts stay at 24h for the live view; export pulls everything)
+                const [allData, markersResp] = await Promise.all([
+                    AdminPanel.fetchAPI(`/admin/api/charts/vitals/${userId}?hours=87600`), // ~10 years
+                    AdminPanel.fetchAPI(`/admin/api/markers/${userId}`)
+                ]);
+                const data = allData.data;
+                const markers = markersResp.markers || [];
+
+                if (!data || data.length === 0) {
+                    AdminPanel.showToast('No vitals readings to export', 'warning');
+                    return;
+                }
+
+                const headers = ['Participant', 'Recorded At', 'PPG (Heart Rate)', 'GSR (Skin Conductance)', 'Acc X', 'Acc Y', 'Acc Z'];
+                const rows = data.map(r => [
+                    findLabelForTimestamp(r.recorded_at, markers),
+                    r.recorded_at,
+                    r.ppg,
+                    r.gsr,
+                    r.acc_x,
+                    r.acc_y,
+                    r.acc_z
+                ]);
+
+                const csvContent = [headers, ...rows]
+                    .map(row => row.map(cell => `"${String(cell ?? '').replace(/"/g, '""')}"`).join(','))
+                    .join('\n');
+
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `vitals_export_ALL_${userId}_${new Date().toISOString().split('T')[0]}.csv`;
+                link.click();
+
+                AdminPanel.showToast(`Exported ${data.length} readings across ${markers.length || 1} participant(s)`, 'success');
+            } catch (error) {
+                console.error('Error exporting vitals:', error);
+                AdminPanel.showToast('Export failed', 'error');
+            }
+        }
+
+        document.getElementById('export-vitals-btn').addEventListener('click', exportVitalsCSV);
+        document.getElementById('new-participant-btn').addEventListener('click', startNewParticipant);
+
+        function loadPPGChart(data) {
+            const ctx = document.getElementById('ppgChart').getContext('2d');
+
+            if (ppgChart) ppgChart.destroy();
+
+            if (data.length === 0) {
+                ctx.font = '14px sans-serif';
+                ctx.fillStyle = '#9CA3AF';
+                ctx.textAlign = 'center';
+                ctx.fillText('No data available', ctx.canvas.width / 2, ctx.canvas.height / 2);
+                return;
+            }
+
+            ppgChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.map(d => new Date(d.recorded_at).toLocaleTimeString()),
+                    datasets: [{
+                        label: 'PPG',
+                        data: data.map(d => d.ppg),
+                        borderColor: '#EF4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { display: false },
+                        y: { beginAtZero: false }
+                    }
+                }
+            });
+        }
+
+        function loadGSRChart(data) {
+            const ctx = document.getElementById('gsrChart').getContext('2d');
+
+            if (gsrChart) gsrChart.destroy();
+
+            if (data.length === 0) {
+                ctx.font = '14px sans-serif';
+                ctx.fillStyle = '#9CA3AF';
+                ctx.textAlign = 'center';
+                ctx.fillText('No data available', ctx.canvas.width / 2, ctx.canvas.height / 2);
+                return;
+            }
+
+            gsrChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.map(d => new Date(d.recorded_at).toLocaleTimeString()),
+                    datasets: [{
+                        label: 'GSR',
+                        data: data.map(d => d.gsr),
+                        borderColor: '#3B82F6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { display: false },
+                        y: { beginAtZero: false }
+                    }
+                }
+            });
+        }
+
+        function loadSessionsTimeline() {
+            const container = document.getElementById('sessions-timeline');
+            const sessions = patientData.sessions || [];
+
+            if (sessions.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8">
+                        <svg class="w-12 h-12 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                        </svg>
+                        <p class="text-gray-500">No sessions yet</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const groupNames = {
+                'G1': 'Binary Thinking',
+                'G2': 'Overgeneralization',
+                'G3': 'Attention Bias',
+                'G4': 'Emotion-Driven',
+                'G0': 'No Distortion'
+            };
+
+            container.innerHTML = sessions.map(session => {
+                const moodChange = session.mood_end && session.mood_start ? session.mood_end - session.mood_start : null;
+                const moodArrow = moodChange !== null
+                    ? (moodChange > 0 ? '<span class="text-green-500">+' + moodChange + '</span>' : (moodChange < 0 ? '<span class="text-red-500">' + moodChange + '</span>' : '<span class="text-gray-500">0</span>'))
+                    : '<span class="text-gray-400">--</span>';
+
+                return `
+                    <div class="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-10 h-10 rounded-full flex items-center justify-center ${session.completed ? 'bg-green-100' : 'bg-gray-200'}">
+                                    ${session.completed
+                                        ? '<svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>'
+                                        : '<svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>'}
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-900">${AdminPanel.formatDate(session.started_at)}</p>
+                                    <p class="text-sm text-gray-500">${session.locked_group ? groupNames[session.locked_group] || session.locked_group : 'N/A'}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-6 text-sm">
+                                <div class="text-center">
+                                    <p class="text-gray-500">Mood</p>
+                                    <p class="font-medium">${moodArrow}</p>
+                                </div>
+                                <div class="text-center">
+                                    <p class="text-gray-500">Stage</p>
+                                    <p class="font-medium text-gray-900">${session.stages_reached || 1}/3</p>
+                                </div>
+                                <span class="px-2 py-1 text-xs font-medium rounded-full ${session.completed ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}">
+                                    ${session.completed ? 'Completed' : 'Incomplete'}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function loadCrisisHistory() {
+            const container = document.getElementById('crisis-history');
+            const crisisHistory = patientData.crisis_history || [];
+
+            if (crisisHistory.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8">
+                        <svg class="w-12 h-12 mx-auto text-green-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <p class="text-gray-500">No crisis flags recorded</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = crisisHistory.map(crisis => `
+                <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <div class="flex items-start justify-between">
+                        <div class="flex items-start space-x-3">
+                            <div class="w-2 h-2 bg-red-500 rounded-full mt-2 ${!crisis.reviewed ? 'animate-pulse' : ''}"></div>
+                            <div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="px-2 py-0.5 bg-red-100 text-red-700 text-xs font-medium rounded">${AdminPanel.escapeHtml(crisis.trigger_word)}</span>
+                                    <span class="text-sm text-gray-500">${AdminPanel.formatTimeAgo(crisis.flagged_at)}</span>
+                                </div>
+                                <p class="text-gray-700 mt-2">${AdminPanel.escapeHtml(crisis.message_content)}</p>
+                            </div>
+                        </div>
+                        <span class="px-2 py-1 text-xs font-medium rounded-full ${crisis.reviewed ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">
+                            ${crisis.reviewed ? 'Reviewed' : 'Pending'}
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function loadMLPredictions() {
+            try {
+                const resp = await AdminPanel.fetchAPI(`/admin/api/charts/window-predictions/${userId}?limit=200`);
+                const data = resp.data || [];
+
+                // Show active episode banner
+                const activeEp2 = patientData.recent_episodes?.find(e => e.is_active);
+                if (activeEp2) {
+                    const startedAt = AdminPanel.formatTimeAgo(activeEp2.start_time);
+                    const riskLabel = activeEp2.peak_risk_level >= 2 ? 'High Stress' : 'Mild Stress';
+                    const confPct = activeEp2.avg_confidence ? (activeEp2.avg_confidence * 100).toFixed(0) + '%' : 'N/A';
+                    document.getElementById('episode-detail').textContent =
+                        `Started ${startedAt} · Peak: ${riskLabel} (${confPct} confidence)`;
+                    document.getElementById('active-episode-banner').classList.remove('hidden');
+                }
+
+                if (data.length === 0) {
+                    document.getElementById('ml-count-normal').textContent = '0';
+                    document.getElementById('ml-count-mild').textContent = '0';
+                    document.getElementById('ml-count-high').textContent = '0';
+                    return;
+                }
+
+                // Summary counts
+                const counts = { 0: 0, 1: 0, 2: 0 };
+                data.forEach(d => counts[d.risk_level] = (counts[d.risk_level] || 0) + 1);
+                document.getElementById('ml-count-normal').textContent = counts[0];
+                document.getElementById('ml-count-mild').textContent = counts[1];
+                document.getElementById('ml-count-high').textContent = counts[2];
+
+                const labels = data.map(d => {
+                    const dt = new Date(d.predicted_at);
+                    return dt.toLocaleDateString() + ' ' + dt.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+                });
+
+                // Point colors per risk level
+                const pointColors = data.map(d =>
+                    d.risk_level === 0 ? '#10B981' :
+                    d.risk_level === 1 ? '#F59E0B' : '#EF4444'
+                );
+
+                // --- Risk Level Chart ---
+                const riskCtx = document.getElementById('mlRiskChart').getContext('2d');
+                if (mlRiskChart) mlRiskChart.destroy();
+
+                mlRiskChart = new Chart(riskCtx, {
+                    type: 'line',
+                    data: {
+                        labels,
+                        datasets: [{
+                            label: 'Risk Level',
+                            data: data.map(d => d.risk_level),
+                            borderColor: '#6366F1',
+                            backgroundColor: 'rgba(99,102,241,0.08)',
+                            fill: true,
+                            tension: 0.3,
+                            pointRadius: 5,
+                            pointBackgroundColor: pointColors,
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: { display: false },
+                            y: {
+                                min: -0.2, max: 2.2,
+                                ticks: {
+                                    stepSize: 1,
+                                    callback: v => ['Normal', 'Mild Stress', 'High Stress'][v] ?? v
+                                },
+                                grid: { color: 'rgba(0,0,0,0.05)' }
+                            }
+                        },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: ctx => {
+                                        const d = data[ctx.dataIndex];
+                                        const label = ['Normal', 'Mild Stress', 'High Stress'][d.risk_level];
+                                        return `${label} (confidence: ${(d.confidence * 100).toFixed(1)}%)`;
+                                    },
+                                    title: ctx => labels[ctx[0].dataIndex]
+                                }
+                            }
+                        }
+                    }
+                });
+
+                // --- Confidence Chart ---
+                const confCtx = document.getElementById('mlConfidenceChart').getContext('2d');
+                if (mlConfidenceChart) mlConfidenceChart.destroy();
+
+                mlConfidenceChart = new Chart(confCtx, {
+                    type: 'bar',
+                    data: {
+                        labels,
+                        datasets: [{
+                            label: 'Confidence',
+                            data: data.map(d => +(d.confidence * 100).toFixed(1)),
+                            backgroundColor: pointColors.map(c => c + 'BB'),
+                            borderColor: pointColors,
+                            borderWidth: 1,
+                            borderRadius: 3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: { display: false },
+                            y: {
+                                min: 0, max: 100,
+                                ticks: { callback: v => v + '%' },
+                                title: { display: true, text: 'Confidence (%)' }
+                            }
+                        },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: ctx => `${ctx.raw}% confidence`,
+                                    title: ctx => labels[ctx[0].dataIndex]
+                                }
+                            }
+                        }
+                    }
+                });
+
+            } catch (error) {
+                console.error('Error loading ML predictions:', error);
+            }
+        }
+
+        function setupEventListeners() {
+            // Tab switching
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // Update buttons
+                    document.querySelectorAll('.tab-btn').forEach(b => {
+                        b.classList.remove('active', 'text-blue-600', 'border-blue-600');
+                        b.classList.add('text-gray-500', 'border-transparent', 'hover:text-gray-700');
+                    });
+                    btn.classList.add('active', 'text-blue-600', 'border-blue-600');
+                    btn.classList.remove('text-gray-500', 'border-transparent', 'hover:text-gray-700');
+
+                    // Update content
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.classList.add('hidden');
+                    });
+                    document.getElementById(`tab-${btn.dataset.tab}`).classList.remove('hidden');
+                });
+            });
+
+            // Sidebar toggle
+            document.getElementById('open-sidebar').addEventListener('click', () => {
+                document.getElementById('sidebar').classList.remove('-translate-x-full');
+                document.getElementById('sidebar-overlay').classList.remove('hidden');
+            });
+
+            document.getElementById('close-sidebar').addEventListener('click', () => {
+                document.getElementById('sidebar').classList.add('-translate-x-full');
+                document.getElementById('sidebar-overlay').classList.add('hidden');
+            });
+
+            document.getElementById('sidebar-overlay').addEventListener('click', () => {
+                document.getElementById('sidebar').classList.add('-translate-x-full');
+                document.getElementById('sidebar-overlay').classList.add('hidden');
+            });
+
+            // Logout
+            document.getElementById('logout-btn').addEventListener('click', () => {
+                AdminPanel.logout();
+            });
+        }
+    </script>
+
+    <style>
+        .tab-btn {
+            border-color: transparent;
+            color: #6B7280;
+        }
+        .tab-btn:hover {
+            color: #374151;
+        }
+        .tab-btn.active {
+            color: #3B82F6;
+            border-color: #3B82F6;
+        }
+    </style>
+</body>
+</html>

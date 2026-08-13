@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - CBT Companion</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        secondary: '#10B981',
+                        danger: '#EF4444',
+                        warning: '#F59E0B',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 flex items-center justify-center p-4">
+    <!-- Background Pattern -->
+    <div class="absolute inset-0 bg-grid-pattern opacity-10"></div>
+
+    <!-- Login Card -->
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 transform transition-all">
+        <!-- Logo & Branding -->
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-lg mb-4">
+                <img src="data:image/png;base64,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" alt="CBT Companion Logo" class="w-10 h-10 object-contain">
+            </div>
+            <h1 class="text-2xl font-bold text-gray-800">CBT Companion</h1>
+            <p class="text-gray-500 mt-1">Admin Portal</p>
+        </div>
+
+        <!-- Error Message -->
+        <div id="error-message" class="hidden mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div class="flex items-center">
+                <svg class="w-5 h-5 text-red-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span id="error-text" class="text-red-700 text-sm"></span>
+            </div>
+        </div>
+
+        <!-- Login Form -->
+        <form id="login-form" class="space-y-6">
+            <!-- Username Input -->
+            <div>
+                <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Username</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
+                    </div>
+                    <input type="text" id="email" name="email" required
+                        class="block w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                        placeholder="admin123">
+                </div>
+            </div>
+
+            <!-- Password Input -->
+            <div>
+                <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                        </svg>
+                    </div>
+                    <input type="password" id="password" name="password" required
+                        class="block w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                        placeholder="Enter your password">
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" id="submit-btn"
+                class="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg shadow-lg hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transform transition-all hover:scale-[1.02] active:scale-[0.98]">
+                <span id="btn-text">Sign In</span>
+                <svg id="btn-spinner" class="hidden animate-spin ml-2 h-5 w-5 text-white inline" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+            </button>
+        </form>
+
+        <!-- Footer -->
+        <p class="mt-8 text-center text-sm text-gray-500">
+            Protected area. Authorized personnel only.
+        </p>
+    </div>
+
+    <script>
+        // Check if already logged in
+        const token = localStorage.getItem('admin_token');
+        if (token) {
+            window.location.href = '/admin/dashboard';
+        }
+
+        // Handle form submission
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('error-message');
+            const errorText = document.getElementById('error-text');
+            const submitBtn = document.getElementById('submit-btn');
+            const btnText = document.getElementById('btn-text');
+            const btnSpinner = document.getElementById('btn-spinner');
+
+            // Show loading state
+            submitBtn.disabled = true;
+            btnText.textContent = 'Signing in...';
+            btnSpinner.classList.remove('hidden');
+            errorDiv.classList.add('hidden');
+
+            try {
+                const response = await fetch('/admin/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Store token and redirect
+                    localStorage.setItem('admin_token', data.token);
+                    localStorage.setItem('admin_user', JSON.stringify(data.user));
+                    window.location.href = '/admin/dashboard';
+                } else {
+                    // Show error
+                    errorText.textContent = data.error || 'Login failed. Please try again.';
+                    errorDiv.classList.remove('hidden');
+                }
+            } catch (error) {
+                errorText.textContent = 'Network error. Please check your connection.';
+                errorDiv.classList.remove('hidden');
+            } finally {
+                // Reset button state
+                submitBtn.disabled = false;
+                btnText.textContent = 'Sign In';
+                btnSpinner.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

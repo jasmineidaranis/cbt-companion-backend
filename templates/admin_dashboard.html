@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - CBT Companion Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        secondary: '#10B981',
+                        danger: '#EF4444',
+                        warning: '#F59E0B',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-xl transform transition-transform duration-300 lg:relative lg:translate-x-0">
+            <!-- Logo -->
+            <div class="flex items-center justify-between h-16 px-6 border-b border-gray-200">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+                        <img src="data:image/png;base64,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" alt="CBT Companion Logo" class="w-6 h-6 object-contain">
+                    </div>
+                    <span class="text-lg font-bold text-gray-800">CBT Admin</span>
+                </div>
+                <button id="close-sidebar" class="lg:hidden p-2 rounded-lg hover:bg-gray-100">
+                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Navigation -->
+            <nav class="px-4 py-6 space-y-2">
+                <a href="/admin/dashboard" class="flex items-center px-4 py-3 text-blue-600 bg-blue-50 rounded-lg">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                    </svg>
+                    Dashboard
+                </a>
+                <a href="/admin/patients" class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                    </svg>
+                    Patients
+                </a>
+            </nav>
+
+            <!-- User Info -->
+            <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
+                        <span id="user-initials" class="text-white font-semibold text-sm">AD</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p id="user-name" class="text-sm font-medium text-gray-900 truncate">Admin</p>
+                        <p id="user-email" class="text-xs text-gray-500 truncate">admin@example.com</p>
+                    </div>
+                    <button id="logout-btn" class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Logout">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Sidebar Overlay -->
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden hidden"></div>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto">
+
+            <!-- ─── Sponsor Banner ─────────────────────────────────────────── -->
+            <div class="relative w-full overflow-hidden bg-white border-b border-gray-100 shadow-sm">
+                <!-- Gradient wash -->
+                <div class="absolute inset-0 bg-gradient-to-r from-blue-50/70 via-white to-indigo-50/70 pointer-events-none"></div>
+                <!-- Left accent stripe -->
+                <div class="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-400 via-indigo-500 to-blue-400"></div>
+                <!-- Right accent stripe -->
+                <div class="absolute right-0 top-0 bottom-0 w-1 bg-gradient-to-b from-indigo-400 via-blue-500 to-indigo-400"></div>
+
+                <div class="relative flex items-center justify-center gap-6 py-2.5 px-10">
+
+                    <!-- Label -->
+                    <div class="flex flex-col items-center leading-tight shrink-0">
+                        <span class="text-[8px] font-black uppercase tracking-[0.3em] text-gray-400">Proudly</span>
+                        <span class="text-[8px] font-black uppercase tracking-[0.3em] text-gray-400">Supported By</span>
+                    </div>
+
+                    <!-- Divider -->
+                    <div class="h-10 w-px bg-gradient-to-b from-transparent via-gray-200 to-transparent shrink-0"></div>
+
+                    <!-- Sponsor 1 -->
+                    <div class="group relative shrink-0">
+                        <div class="absolute -inset-2 rounded-xl bg-blue-50 opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-sm"></div>
+                        <img src="{{ url_for('static', filename='images/sponsor1.jpeg') }}"
+                             alt="Sponsor"
+                             class="w-48 h-48 object-contain">
+                    </div>
+
+                    <!-- Dot separator -->
+                    <div class="flex items-center gap-1 shrink-0">
+                        <div class="w-1 h-1 rounded-full bg-gray-200"></div>
+                        <div class="w-1.5 h-1.5 rounded-full bg-gray-300"></div>
+                        <div class="w-1 h-1 rounded-full bg-gray-200"></div>
+                    </div>
+
+                    <!-- Sponsor 2 -->
+                    <div class="group relative shrink-0">
+                        <div class="absolute -inset-2 rounded-xl bg-indigo-50 opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-sm"></div>
+                        <img src="{{ url_for('static', filename='images/sponsor2.jpeg') }}"
+                             alt="Sponsor"
+                             class="w-48 h-48 object-contain">
+                    </div>
+
+                </div>
+            </div>
+            <!-- ──────────────────────────────────────────────────────────────── -->
+
+            <!-- Top Bar -->
+            <header class="bg-white shadow-sm sticky top-0 z-30">
+                <div class="flex items-center justify-between h-16 px-6">
+                    <div class="flex items-center space-x-4">
+                        <button id="open-sidebar" class="lg:hidden p-2 rounded-lg hover:bg-gray-100">
+                            <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                            </svg>
+                        </button>
+                        <h1 class="text-xl font-semibold text-gray-800">Dashboard</h1>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <span id="last-updated" class="text-sm text-gray-500">Updated just now</span>
+                        <button id="refresh-btn" class="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-colors" title="Refresh">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard Content -->
+            <div class="p-6 space-y-6">
+                <!-- Stats Cards Row -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Total Patients Card -->
+                    <div class="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Total Patients</p>
+                                <p id="stat-patients" class="text-3xl font-bold text-gray-800 mt-1">-</p>
+                                <p class="text-xs text-gray-400 mt-1"><span id="stat-sessions" class="font-medium text-gray-600">-</span> sessions today</p>
+                            </div>
+                            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Crisis Alerts Card -->
+                    <div class="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow border-l-4 border-red-500">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Crisis Alerts</p>
+                                <p id="stat-alerts" class="text-3xl font-bold text-red-600 mt-1">-</p>
+                                <p class="text-xs text-gray-400 mt-1">unreviewed — requires attention</p>
+                            </div>
+                            <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
+                                <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Avg Mood Change Card -->
+                    <div class="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Avg Mood Change</p>
+                                <p id="stat-mood" class="text-3xl font-bold text-gray-800 mt-1">-</p>
+                                <p class="text-xs text-gray-400 mt-1">across completed sessions</p>
+                            </div>
+                            <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Wearable / ML Stats Row -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Active Risk Episodes -->
+                    <div id="card-active-episodes" class="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow border-l-4 border-orange-400">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Active Risk Episodes</p>
+                                <p id="stat-active-episodes" class="text-3xl font-bold text-orange-600 mt-1">-</p>
+                                <p class="text-xs text-gray-400 mt-1">patients with ongoing ML-detected stress</p>
+                            </div>
+                            <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+                                <svg class="w-6 h-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Wearable Readings Today -->
+                    <div class="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Wearable Readings (24h)</p>
+                                <p id="stat-wearable-today" class="text-3xl font-bold text-teal-600 mt-1">-</p>
+                                <p class="text-xs text-gray-400 mt-1">sensor data points received</p>
+                            </div>
+                            <div class="w-12 h-12 bg-teal-100 rounded-xl flex items-center justify-center">
+                                <svg class="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Row -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Session Trends Chart -->
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Session Trends (30 Days)</h3>
+                        <div class="h-64">
+                            <canvas id="sessionsChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Distortion Distribution Chart -->
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Distortion Distribution</h3>
+                        <div class="h-64 flex items-center justify-center">
+                            <canvas id="distortionChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Crisis Alerts Panel -->
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-red-500 to-red-600">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-lg font-semibold text-white flex items-center">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                </svg>
+                                Crisis Alerts
+                            </h3>
+                            <span id="alert-badge" class="px-3 py-1 bg-white text-red-600 text-sm font-semibold rounded-full">0 pending</span>
+                        </div>
+                    </div>
+
+                    <div id="alerts-container" class="divide-y divide-gray-100">
+                        <!-- Alerts will be populated here -->
+                        <div id="alerts-loading" class="p-8 text-center text-gray-500">
+                            <svg class="animate-spin h-8 w-8 mx-auto mb-4 text-gray-400" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Loading alerts...
+                        </div>
+                        <div id="no-alerts" class="hidden p-8 text-center">
+                            <svg class="w-12 h-12 mx-auto text-green-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <p class="text-gray-500">No pending alerts</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Patients -->
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                        <h3 class="text-lg font-semibold text-gray-800">Recent Patients</h3>
+                        <a href="/admin/patients" class="text-blue-600 hover:text-blue-700 text-sm font-medium">View All</a>
+                    </div>
+                    <div id="recent-patients" class="divide-y divide-gray-100">
+                        <!-- Recent patients will be populated here -->
+                        <div id="patients-loading" class="p-8 text-center text-gray-500">
+                            <svg class="animate-spin h-8 w-8 mx-auto mb-4 text-gray-400" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Loading patients...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed bottom-4 right-4 z-50 space-y-2"></div>
+
+    <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+    <script>
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check authentication
+            if (!AdminPanel.isAuthenticated()) {
+                window.location.href = '/admin/login';
+                return;
+            }
+
+            // Set user info
+            const user = AdminPanel.getUser();
+            if (user) {
+                document.getElementById('user-name').textContent = user.name;
+                document.getElementById('user-email').textContent = user.email;
+                document.getElementById('user-initials').textContent = user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+            }
+
+            // Initialize charts and data
+            initializeDashboard();
+
+            // Setup event listeners
+            setupEventListeners();
+
+            // Start auto-refresh
+            setInterval(refreshData, 30000); // 30 seconds
+        });
+
+        let sessionsChart = null;
+        let distortionChart = null;
+
+        async function initializeDashboard() {
+            await Promise.all([
+                loadStats(),
+                loadAlerts(),
+                loadRecentPatients(),
+                loadSessionsChart(),
+                loadDistortionChart()
+            ]);
+        }
+
+        async function refreshData() {
+            await Promise.all([
+                loadStats(),
+                loadAlerts()
+            ]);
+            document.getElementById('last-updated').textContent = 'Updated just now';
+        }
+
+        async function loadStats() {
+            try {
+                const data = await AdminPanel.fetchAPI('/admin/api/stats');
+                document.getElementById('stat-patients').textContent = data.total_users;
+                document.getElementById('stat-sessions').textContent = data.sessions_today;
+                document.getElementById('stat-alerts').textContent = data.unreviewed_alerts;
+
+                const moodChange = data.avg_mood_change;
+                const moodEl = document.getElementById('stat-mood');
+                if (moodChange > 0) {
+                    moodEl.textContent = '+' + moodChange;
+                    moodEl.classList.remove('text-gray-800');
+                    moodEl.classList.add('text-green-600');
+                } else if (moodChange < 0) {
+                    moodEl.textContent = moodChange;
+                    moodEl.classList.remove('text-gray-800');
+                    moodEl.classList.add('text-red-600');
+                } else {
+                    moodEl.textContent = '0';
+                }
+
+                // Wearable / ML stats
+                const episodes = data.active_episodes ?? 0;
+                document.getElementById('stat-active-episodes').textContent = episodes;
+                const episodeCard = document.getElementById('card-active-episodes');
+                if (episodes > 0) {
+                    episodeCard.classList.add('border-orange-500');
+                    episodeCard.classList.remove('border-orange-400');
+                }
+
+                document.getElementById('stat-wearable-today').textContent = data.wearable_readings_today ?? 0;
+
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        async function loadAlerts() {
+            try {
+                const data = await AdminPanel.fetchAPI('/admin/api/alerts?reviewed=false');
+                const container = document.getElementById('alerts-container');
+                const loading = document.getElementById('alerts-loading');
+                const noAlerts = document.getElementById('no-alerts');
+                const badge = document.getElementById('alert-badge');
+
+                loading.classList.add('hidden');
+
+                if (data.alerts.length === 0) {
+                    noAlerts.classList.remove('hidden');
+                    badge.textContent = '0 pending';
+                    return;
+                }
+
+                noAlerts.classList.add('hidden');
+                badge.textContent = data.alerts.length + ' pending';
+
+                // Clear and populate alerts
+                container.innerHTML = '';
+                data.alerts.slice(0, 5).forEach(alert => {
+                    container.appendChild(createAlertElement(alert));
+                });
+
+            } catch (error) {
+                console.error('Error loading alerts:', error);
+            }
+        }
+
+        function createAlertElement(alert) {
+            const div = document.createElement('div');
+            div.className = 'p-4 hover:bg-red-50 transition-colors';
+            div.innerHTML = `
+                <div class="flex items-start justify-between">
+                    <div class="flex items-start space-x-3">
+                        <div class="w-2 h-2 bg-red-500 rounded-full mt-2 animate-pulse"></div>
+                        <div>
+                            <a href="/admin/patients/${alert.user_id}" class="font-medium text-gray-900 hover:text-blue-600">
+                                ${AdminPanel.escapeHtml(alert.user_name)}
+                            </a>
+                            <span class="ml-2 px-2 py-0.5 bg-red-100 text-red-700 text-xs font-medium rounded">${AdminPanel.escapeHtml(alert.trigger_word)}</span>
+                            <p class="text-sm text-gray-600 mt-1 line-clamp-2">${AdminPanel.escapeHtml(alert.message_content)}</p>
+                            <p class="text-xs text-gray-400 mt-1">${AdminPanel.formatTimeAgo(alert.flagged_at)}</p>
+                        </div>
+                    </div>
+                    <button onclick="reviewAlert('${alert.id}')" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-lg transition-colors">
+                        Review
+                    </button>
+                </div>
+            `;
+            return div;
+        }
+
+        async function reviewAlert(alertId) {
+            try {
+                await AdminPanel.fetchAPI(`/admin/api/alerts/${alertId}/review`, { method: 'POST' });
+                AdminPanel.showToast('Alert marked as reviewed', 'success');
+                await loadAlerts();
+                await loadStats();
+            } catch (error) {
+                AdminPanel.showToast('Failed to review alert', 'error');
+            }
+        }
+
+        async function loadRecentPatients() {
+            try {
+                const data = await AdminPanel.fetchAPI('/admin/api/patients');
+                const container = document.getElementById('recent-patients');
+                const loading = document.getElementById('patients-loading');
+
+                loading.classList.add('hidden');
+
+                if (data.patients.length === 0) {
+                    container.innerHTML = '<div class="p-8 text-center text-gray-500">No patients yet</div>';
+                    return;
+                }
+
+                container.innerHTML = '';
+                data.patients.slice(0, 5).forEach(patient => {
+                    const div = document.createElement('div');
+                    div.className = 'p-4 hover:bg-gray-50 transition-colors cursor-pointer';
+                    div.onclick = () => window.location.href = `/admin/patients/${patient.id}`;
+                    div.innerHTML = `
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full flex items-center justify-center">
+                                    <span class="text-white font-semibold text-sm">${patient.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}</span>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-900">${AdminPanel.escapeHtml(patient.name)}</p>
+                                    <p class="text-sm text-gray-500">${patient.total_sessions} sessions</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                ${patient.unreviewed_alerts > 0 ? `<span class="px-2 py-0.5 bg-red-100 text-red-700 text-xs font-medium rounded-full">${patient.unreviewed_alerts} alerts</span>` : ''}
+                                <span class="text-sm text-gray-400">${patient.last_session_date ? AdminPanel.formatDate(patient.last_session_date) : 'Never'}</span>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+
+            } catch (error) {
+                console.error('Error loading patients:', error);
+            }
+        }
+
+        async function loadSessionsChart() {
+            try {
+                const data = await AdminPanel.fetchAPI('/admin/api/charts/sessions');
+
+                const ctx = document.getElementById('sessionsChart').getContext('2d');
+
+                // Fill missing dates with 0
+                const dates = [];
+                const counts = [];
+                const today = new Date();
+
+                for (let i = 29; i >= 0; i--) {
+                    const date = new Date(today);
+                    date.setDate(date.getDate() - i);
+                    const dateStr = date.toISOString().split('T')[0];
+                    dates.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+
+                    const found = data.data.find(d => d.date === dateStr);
+                    counts.push(found ? found.count : 0);
+                }
+
+                if (sessionsChart) {
+                    sessionsChart.destroy();
+                }
+
+                sessionsChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: dates,
+                        datasets: [{
+                            label: 'Sessions',
+                            data: counts,
+                            borderColor: '#3B82F6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 0,
+                            pointHoverRadius: 6,
+                            pointHoverBackgroundColor: '#3B82F6',
+                            pointHoverBorderColor: '#fff',
+                            pointHoverBorderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            x: {
+                                grid: { display: false },
+                                ticks: {
+                                    maxRotation: 0,
+                                    maxTicksLimit: 7
+                                }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: 'rgba(0,0,0,0.05)' },
+                                ticks: { stepSize: 1 }
+                            }
+                        },
+                        interaction: {
+                            intersect: false,
+                            mode: 'index'
+                        }
+                    }
+                });
+
+            } catch (error) {
+                console.error('Error loading sessions chart:', error);
+            }
+        }
+
+        async function loadDistortionChart() {
+            try {
+                const data = await AdminPanel.fetchAPI('/admin/api/charts/distortions');
+
+                const ctx = document.getElementById('distortionChart').getContext('2d');
+
+                if (distortionChart) {
+                    distortionChart.destroy();
+                }
+
+                const labels = {
+                    'G1': 'Binary Thinking',
+                    'G2': 'Overgeneralization',
+                    'G3': 'Attention Bias',
+                    'G4': 'Emotion-Driven'
+                };
+
+                const colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444'];
+
+                distortionChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(data).map(k => labels[k] || k),
+                        datasets: [{
+                            data: Object.values(data),
+                            backgroundColor: colors,
+                            borderWidth: 0,
+                            hoverOffset: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: {
+                                    usePointStyle: true,
+                                    padding: 16
+                                }
+                            }
+                        },
+                        cutout: '65%'
+                    }
+                });
+
+            } catch (error) {
+                console.error('Error loading distortion chart:', error);
+            }
+        }
+
+        function setupEventListeners() {
+            // Sidebar toggle
+            document.getElementById('open-sidebar').addEventListener('click', () => {
+                document.getElementById('sidebar').classList.remove('-translate-x-full');
+                document.getElementById('sidebar-overlay').classList.remove('hidden');
+            });
+
+            document.getElementById('close-sidebar').addEventListener('click', () => {
+                document.getElementById('sidebar').classList.add('-translate-x-full');
+                document.getElementById('sidebar-overlay').classList.add('hidden');
+            });
+
+            document.getElementById('sidebar-overlay').addEventListener('click', () => {
+                document.getElementById('sidebar').classList.add('-translate-x-full');
+                document.getElementById('sidebar-overlay').classList.add('hidden');
+            });
+
+            // Logout
+            document.getElementById('logout-btn').addEventListener('click', () => {
+                AdminPanel.logout();
+            });
+
+            // Refresh
+            document.getElementById('refresh-btn').addEventListener('click', async () => {
+                const btn = document.getElementById('refresh-btn');
+                btn.classList.add('animate-spin');
+                await refreshData();
+                btn.classList.remove('animate-spin');
+                AdminPanel.showToast('Data refreshed', 'success');
+            });
+        }
+    </script>
+</body>
+</html>

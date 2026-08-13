@@ -1,0 +1,97 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Logs
+*.log
+
+# Docker
+*.log
+*.pid
+*.seed
+*.pid.lock
+
+# Static files
+static/css/
+static/js/
+static/templates/
+
+# Data files
+data/*.csv
+
+# Models — large checkpoints excluded; small bundled models tracked directly
+models/*
+!models/*.pth.zip
+
+# Local settings
+.claude/settings.local.json
+
+
+
+*.pptx
+
+# Internal/dev-only markdown docs
+CLAUDE.md
+DEPLOY_NOW.md
+HF_OPTIMIZATION_FIXES.md
+INTEGRATION_INSTRUCTIONS.md
+NEXT_STEPS.md
+
+
+
+cbt.db
+*.csv

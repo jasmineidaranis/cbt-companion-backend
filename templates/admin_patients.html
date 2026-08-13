@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patients - CBT Companion Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        secondary: '#10B981',
+                        danger: '#EF4444',
+                        warning: '#F59E0B',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-xl transform -translate-x-full transition-transform duration-300 lg:relative lg:translate-x-0">
+            <!-- Logo -->
+            <div class="flex items-center justify-between h-16 px-6 border-b border-gray-200">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+                        <img src="data:image/png;base64,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" alt="CBT Companion Logo" class="w-6 h-6 object-contain">
+                    </div>
+                    <span class="text-lg font-bold text-gray-800">CBT Admin</span>
+                </div>
+                <button id="close-sidebar" class="lg:hidden p-2 rounded-lg hover:bg-gray-100">
+                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Navigation -->
+            <nav class="px-4 py-6 space-y-2">
+                <a href="/admin/dashboard" class="flex items-center px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                    </svg>
+                    Dashboard
+                </a>
+                <a href="/admin/patients" class="flex items-center px-4 py-3 text-blue-600 bg-blue-50 rounded-lg">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                    </svg>
+                    Patients
+                </a>
+            </nav>
+
+            <!-- User Info -->
+            <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
+                        <span id="user-initials" class="text-white font-semibold text-sm">AD</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p id="user-name" class="text-sm font-medium text-gray-900 truncate">Admin</p>
+                        <p id="user-email" class="text-xs text-gray-500 truncate">admin@example.com</p>
+                    </div>
+                    <button id="logout-btn" class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Logout">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Sidebar Overlay -->
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden hidden"></div>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto">
+
+            <!-- Top Bar -->
+            <header class="bg-white shadow-sm sticky top-0 z-30">
+                <div class="flex items-center justify-between h-16 px-6">
+                    <div class="flex items-center space-x-4">
+                        <button id="open-sidebar" class="lg:hidden p-2 rounded-lg hover:bg-gray-100">
+                            <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                            </svg>
+                        </button>
+                        <h1 class="text-xl font-semibold text-gray-800">Patients</h1>
+                    </div>
+                    <button id="export-btn" class="flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        Export CSV
+                    </button>
+                </div>
+            </header>
+
+            <!-- Patients Content -->
+            <div class="p-6">
+                <!-- Search and Filters -->
+                <div class="bg-white rounded-xl shadow-sm p-4 mb-6">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                        <!-- Search -->
+                        <div class="relative flex-1 max-w-md">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                </svg>
+                            </div>
+                            <input type="text" id="search-input" placeholder="Search patients..."
+                                class="block w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+
+                        <!-- Filters -->
+                        <div class="flex items-center gap-4">
+                            <select id="filter-status" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">All Status</option>
+                                <option value="active">Active (7 days)</option>
+                                <option value="inactive">Inactive</option>
+                            </select>
+                            <select id="filter-alerts" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">All Alerts</option>
+                                <option value="has-alerts">Has Alerts</option>
+                                <option value="no-alerts">No Alerts</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Patients Table -->
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" data-sort="name">
+                                        <div class="flex items-center">
+                                            Patient
+                                            <svg class="w-4 h-4 ml-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
+                                            </svg>
+                                        </div>
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Email
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" data-sort="sessions">
+                                        <div class="flex items-center">
+                                            Sessions
+                                            <svg class="w-4 h-4 ml-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
+                                            </svg>
+                                        </div>
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" data-sort="last_active">
+                                        <div class="flex items-center">
+                                            Last Active
+                                            <svg class="w-4 h-4 ml-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
+                                            </svg>
+                                        </div>
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Alerts
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Wearable Risk
+                                    </th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Status
+                                    </th>
+                                    <th scope="col" class="relative px-6 py-3">
+                                        <span class="sr-only">Actions</span>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="patients-table-body" class="bg-white divide-y divide-gray-200">
+                                <!-- Loading state -->
+                                <tr id="loading-row">
+                                    <td colspan="8" class="px-6 py-12 text-center">
+                                        <svg class="animate-spin h-8 w-8 mx-auto mb-4 text-gray-400" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        <p class="text-gray-500">Loading patients...</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div id="pagination" class="hidden px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+                        <p class="text-sm text-gray-500">
+                            Showing <span id="showing-start">1</span> to <span id="showing-end">10</span> of <span id="total-count">0</span> patients
+                        </p>
+                        <div class="flex items-center space-x-2">
+                            <button id="prev-page" class="px-3 py-1 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                                Previous
+                            </button>
+                            <span id="page-info" class="text-sm text-gray-600">Page 1</span>
+                            <button id="next-page" class="px-3 py-1 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                                Next
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed bottom-4 right-4 z-50 space-y-2"></div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="delete-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+        <div class="bg-white rounded-xl shadow-xl p-6 w-full max-w-md mx-4">
+            <div class="flex items-center mb-4">
+                <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                    <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900">Delete User</h3>
+                    <p class="text-sm text-gray-500">This action cannot be undone</p>
+                </div>
+            </div>
+            <p class="text-sm text-gray-700 mb-1">You are about to permanently delete:</p>
+            <div class="bg-gray-50 rounded-lg p-3 mb-5">
+                <p id="delete-modal-name" class="font-semibold text-gray-900 text-sm"></p>
+                <p id="delete-modal-email" class="text-gray-500 text-xs mt-0.5"></p>
+            </div>
+            <p class="text-xs text-red-600 mb-5">All sessions, messages, exercises, alerts, and wearable data for this user will be permanently deleted.</p>
+            <div class="flex justify-end gap-3">
+                <button id="delete-modal-cancel" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                    Cancel
+                </button>
+                <button id="delete-modal-confirm" class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                    Delete User
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+    <script>
+        let allPatients = [];
+        let filteredPatients = [];
+        let currentPage = 1;
+        const pageSize = 10;
+        let sortField = 'name';
+        let sortDirection = 'asc';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check authentication
+            if (!AdminPanel.isAuthenticated()) {
+                window.location.href = '/admin/login';
+                return;
+            }
+
+            // Set user info
+            const user = AdminPanel.getUser();
+            if (user) {
+                document.getElementById('user-name').textContent = user.name;
+                document.getElementById('user-email').textContent = user.email;
+                document.getElementById('user-initials').textContent = user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+            }
+
+            // Load patients
+            loadPatients();
+
+            // Setup event listeners
+            setupEventListeners();
+        });
+
+        async function loadPatients() {
+            try {
+                const data = await AdminPanel.fetchAPI('/admin/api/patients');
+                allPatients = data.patients;
+                applyFilters();
+            } catch (error) {
+                console.error('Error loading patients:', error);
+                AdminPanel.showToast('Failed to load patients', 'error');
+            }
+        }
+
+        function applyFilters() {
+            const search = document.getElementById('search-input').value.toLowerCase();
+            const statusFilter = document.getElementById('filter-status').value;
+            const alertsFilter = document.getElementById('filter-alerts').value;
+
+            filteredPatients = allPatients.filter(patient => {
+                // Search filter
+                const matchesSearch = !search ||
+                    patient.name.toLowerCase().includes(search) ||
+                    patient.email.toLowerCase().includes(search);
+
+                // Status filter
+                let matchesStatus = true;
+                if (statusFilter === 'active') {
+                    const lastActive = patient.last_session_date ? new Date(patient.last_session_date) : null;
+                    const sevenDaysAgo = new Date();
+                    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+                    matchesStatus = lastActive && lastActive >= sevenDaysAgo;
+                } else if (statusFilter === 'inactive') {
+                    const lastActive = patient.last_session_date ? new Date(patient.last_session_date) : null;
+                    const sevenDaysAgo = new Date();
+                    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+                    matchesStatus = !lastActive || lastActive < sevenDaysAgo;
+                }
+
+                // Alerts filter
+                let matchesAlerts = true;
+                if (alertsFilter === 'has-alerts') {
+                    matchesAlerts = patient.unreviewed_alerts > 0;
+                } else if (alertsFilter === 'no-alerts') {
+                    matchesAlerts = patient.unreviewed_alerts === 0;
+                }
+
+                return matchesSearch && matchesStatus && matchesAlerts;
+            });
+
+            // Sort
+            sortPatients();
+
+            // Reset to first page
+            currentPage = 1;
+            renderPatients();
+        }
+
+        function sortPatients() {
+            filteredPatients.sort((a, b) => {
+                let valA, valB;
+
+                switch (sortField) {
+                    case 'name':
+                        valA = a.name.toLowerCase();
+                        valB = b.name.toLowerCase();
+                        break;
+                    case 'sessions':
+                        valA = a.total_sessions;
+                        valB = b.total_sessions;
+                        break;
+                    case 'last_active':
+                        valA = a.last_session_date ? new Date(a.last_session_date) : new Date(0);
+                        valB = b.last_session_date ? new Date(b.last_session_date) : new Date(0);
+                        break;
+                    default:
+                        return 0;
+                }
+
+                if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
+                if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
+                return 0;
+            });
+        }
+
+        function renderPatients() {
+            const tbody = document.getElementById('patients-table-body');
+            const loadingRow = document.getElementById('loading-row');
+            const pagination = document.getElementById('pagination');
+
+            if (loadingRow) loadingRow.remove();
+
+            // Calculate pagination
+            const totalPages = Math.ceil(filteredPatients.length / pageSize);
+            const start = (currentPage - 1) * pageSize;
+            const end = Math.min(start + pageSize, filteredPatients.length);
+            const pagePatients = filteredPatients.slice(start, end);
+
+            // Clear table
+            tbody.innerHTML = '';
+
+            if (pagePatients.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="px-6 py-12 text-center text-gray-500">
+                            No patients found
+                        </td>
+                    </tr>
+                `;
+                pagination.classList.add('hidden');
+                return;
+            }
+
+            // Render patients
+            pagePatients.forEach(patient => {
+                const row = createPatientRow(patient);
+                tbody.appendChild(row);
+            });
+
+            // Update pagination
+            pagination.classList.remove('hidden');
+            document.getElementById('showing-start').textContent = start + 1;
+            document.getElementById('showing-end').textContent = end;
+            document.getElementById('total-count').textContent = filteredPatients.length;
+            document.getElementById('page-info').textContent = `Page ${currentPage} of ${totalPages || 1}`;
+            document.getElementById('prev-page').disabled = currentPage === 1;
+            document.getElementById('next-page').disabled = currentPage >= totalPages;
+        }
+
+        function createPatientRow(patient) {
+            const row = document.createElement('tr');
+            row.className = 'hover:bg-gray-50 cursor-pointer transition-colors';
+            row.onclick = () => window.location.href = `/admin/patients/${patient.id}`;
+
+            const lastActive = patient.last_session_date ? new Date(patient.last_session_date) : null;
+            const sevenDaysAgo = new Date();
+            sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+            const isActive = lastActive && lastActive >= sevenDaysAgo;
+
+            row.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span class="text-white font-semibold text-sm">${patient.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}</span>
+                        </div>
+                        <div class="ml-4">
+                            <div class="text-sm font-medium text-gray-900">${AdminPanel.escapeHtml(patient.name)}</div>
+                            <div class="text-sm text-gray-500">${patient.context || 'person'}</div>
+                        </div>
+                    </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    ${AdminPanel.escapeHtml(patient.email)}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    ${patient.total_sessions}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    ${lastActive ? AdminPanel.formatDate(patient.last_session_date) : 'Never'}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    ${patient.unreviewed_alerts > 0
+                        ? `<span class="px-2 py-1 text-xs font-medium bg-red-100 text-red-700 rounded-full">${patient.unreviewed_alerts} pending</span>`
+                        : '<span class="text-gray-400">-</span>'}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    ${patient.has_active_episode
+                        ? `<span class="px-2 py-1 text-xs font-medium bg-orange-100 text-orange-700 rounded-full animate-pulse">⚠ Active</span>`
+                        : '<span class="text-gray-400 text-xs">Normal</span>'}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    ${isActive
+                        ? '<span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-700 rounded-full">Active</span>'
+                        : '<span class="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded-full">Inactive</span>'}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <button onclick="event.stopPropagation(); window.location.href='/admin/patients/${patient.id}'" class="text-blue-600 hover:text-blue-900 mr-3">
+                        View
+                    </button>
+                    <button onclick="event.stopPropagation(); confirmDeleteUser('${patient.id}', '${AdminPanel.escapeHtml(patient.name)}', '${AdminPanel.escapeHtml(patient.email)}')" class="text-red-500 hover:text-red-700 font-medium">
+                        Delete
+                    </button>
+                </td>
+            `;
+
+            return row;
+        }
+
+        // ---- Delete User ----
+        let pendingDeleteId = null;
+
+        function confirmDeleteUser(userId, name, email) {
+            pendingDeleteId = userId;
+            document.getElementById('delete-modal-name').textContent = name;
+            document.getElementById('delete-modal-email').textContent = email;
+            document.getElementById('delete-modal').classList.remove('hidden');
+        }
+
+        async function deleteUser() {
+            if (!pendingDeleteId) return;
+            const btn = document.getElementById('delete-modal-confirm');
+            btn.disabled = true;
+            btn.textContent = 'Deleting…';
+
+            try {
+                const res = await AdminPanel.fetchAPI(`/admin/api/users/${pendingDeleteId}`, { method: 'DELETE' });
+                document.getElementById('delete-modal').classList.add('hidden');
+                AdminPanel.showToast('User deleted successfully', 'success');
+                // Remove from local arrays and re-render
+                allPatients = allPatients.filter(p => p.id !== pendingDeleteId);
+                pendingDeleteId = null;
+                applyFilters();
+            } catch (error) {
+                AdminPanel.showToast('Failed to delete user: ' + (error.message || 'Unknown error'), 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg> Delete User`;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('delete-modal-cancel').addEventListener('click', () => {
+                document.getElementById('delete-modal').classList.add('hidden');
+                pendingDeleteId = null;
+            });
+            document.getElementById('delete-modal-confirm').addEventListener('click', deleteUser);
+            // Close modal on backdrop click
+            document.getElementById('delete-modal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.add('hidden');
+                    pendingDeleteId = null;
+                }
+            });
+        });
+        // ---- End Delete User ----
+
+        function exportCSV() {
+            if (filteredPatients.length === 0) {
+                AdminPanel.showToast('No patients to export', 'warning');
+                return;
+            }
+
+            const headers = ['Name', 'Email', 'Context', 'Total Sessions', 'Total Exercises', 'Current Streak', 'Last Session', 'Unreviewed Alerts', 'Created At'];
+            const rows = filteredPatients.map(p => [
+                p.name,
+                p.email,
+                p.context,
+                p.total_sessions,
+                p.total_exercises,
+                p.current_streak,
+                p.last_session_date || '',
+                p.unreviewed_alerts,
+                p.created_at
+            ]);
+
+            const csvContent = [headers, ...rows]
+                .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+                .join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `patients_export_${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+
+            AdminPanel.showToast('CSV exported successfully', 'success');
+        }
+
+        function setupEventListeners() {
+            // Search
+            let searchTimeout;
+            document.getElementById('search-input').addEventListener('input', () => {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(applyFilters, 300);
+            });
+
+            // Filters
+            document.getElementById('filter-status').addEventListener('change', applyFilters);
+            document.getElementById('filter-alerts').addEventListener('change', applyFilters);
+
+            // Sort headers
+            document.querySelectorAll('[data-sort]').forEach(header => {
+                header.addEventListener('click', () => {
+                    const field = header.dataset.sort;
+                    if (sortField === field) {
+                        sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        sortField = field;
+                        sortDirection = 'asc';
+                    }
+                    applyFilters();
+                });
+            });
+
+            // Pagination
+            document.getElementById('prev-page').addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderPatients();
+                }
+            });
+
+            document.getElementById('next-page').addEventListener('click', () => {
+                const totalPages = Math.ceil(filteredPatients.length / pageSize);
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderPatients();
+                }
+            });
+
+            // Export
+            document.getElementById('export-btn').addEventListener('click', exportCSV);
+
+            // Sidebar toggle
+            document.getElementById('open-sidebar').addEventListener('click', () => {
+                document.getElementById('sidebar').classList.remove('-translate-x-full');
+                document.getElementById('sidebar-overlay').classList.remove('hidden');
+            });
+
+            document.getElementById('close-sidebar').addEventListener('click', () => {
+                document.getElementById('sidebar').classList.add('-translate-x-full');
+                document.getElementById('sidebar-overlay').classList.add('hidden');
+            });
+
+            document.getElementById('sidebar-overlay').addEventListener('click', () => {
+                document.getElementById('sidebar').classList.add('-translate-x-full');
+                document.getElementById('sidebar-overlay').classList.add('hidden');
+            });
+
+            // Logout
+            document.getElementById('logout-btn').addEventListener('click', () => {
+                AdminPanel.logout();
+            });
+        }
+    </script>
+</body>
+</html>
