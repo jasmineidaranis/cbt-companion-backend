@@ -66,8 +66,6 @@ venv.bak/
 *.pid.lock
 
 # Static files
-static/css/
-static/js/
 static/templates/
 
 # Data files
