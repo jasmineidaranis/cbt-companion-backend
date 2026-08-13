@@ -181,26 +181,14 @@ def get_vitals_chart_data(user_id):
     return jsonify({'data': data})
 
 
-@admin_bp.route('/api/markers/<user_id>', methods=['POST'])
+@admin_bp.route('/api/export/all-readings', methods=['GET'])
 @admin_required
-def create_participant_marker(user_id):
-    """Tag the start of a new participant's session on this device/login."""
-    body = request.get_json(force=True, silent=True) or {}
-    label = (body.get('label') or '').strip()
-    if not label:
-        return jsonify({'error': 'label is required'}), 400
+def export_all_readings():
+    """Get every wearable reading from every participant, joined with their
+    name/email, for the global Export Readings CSV button on the Patients page."""
     db = get_db()
-    marker = db.create_session_marker(user_id, label)
-    return jsonify({'marker': marker})
-
-
-@admin_bp.route('/api/markers/<user_id>', methods=['GET'])
-@admin_required
-def list_participant_markers(user_id):
-    """List all participant-session markers for this user, oldest first."""
-    db = get_db()
-    markers = db.get_session_markers(user_id)
-    return jsonify({'markers': markers})
+    readings = db.get_all_wearable_readings()
+    return jsonify({'readings': readings})
 
 
 @admin_bp.route('/api/charts/mood/<user_id>')

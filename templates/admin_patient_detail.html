@@ -211,14 +211,6 @@
 
                         <!-- Vitals Tab -->
                         <div id="tab-vitals" class="tab-content hidden">
-                            <div class="flex justify-end mb-4 gap-2">
-                                <button id="new-participant-btn" class="flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors">
-                                    Start New Participant
-                                </button>
-                                <button id="export-vitals-btn" class="flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
-                                    Export Vitals CSV
-                                </button>
-                            </div>
                             <!-- Current Readings -->
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                                 <div class="bg-red-50 rounded-lg p-4">
@@ -602,84 +594,6 @@
                 console.error('Error loading vitals:', error);
             }
         }
-
-        async function startNewParticipant() {
-            const label = prompt('Enter a label for this new participant (e.g. "Participant 3"):');
-            if (!label || !label.trim()) return;
-
-            try {
-                await AdminPanel.fetchAPI(`/admin/api/markers/${userId}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ label: label.trim() })
-                });
-                AdminPanel.showToast(`Marked start of "${label.trim()}" — begin taking readings now`, 'success');
-            } catch (error) {
-                console.error('Error creating marker:', error);
-                AdminPanel.showToast('Failed to start new participant marker', 'error');
-            }
-        }
-
-        function findLabelForTimestamp(recordedAt, markers) {
-            // markers is sorted oldest -> newest; find the latest marker at or before this reading's time
-            let label = 'Unlabeled';
-            for (const m of markers) {
-                if (m.created_at <= recordedAt) {
-                    label = m.label;
-                } else {
-                    break;
-                }
-            }
-            return label;
-        }
-
-        async function exportVitalsCSV() {
-            try {
-                AdminPanel.showToast('Fetching all readings...', 'info');
-                // Use a very large hours window to effectively get ALL historical readings
-                // (charts stay at 24h for the live view; export pulls everything)
-                const [allData, markersResp] = await Promise.all([
-                    AdminPanel.fetchAPI(`/admin/api/charts/vitals/${userId}?hours=87600`), // ~10 years
-                    AdminPanel.fetchAPI(`/admin/api/markers/${userId}`)
-                ]);
-                const data = allData.data;
-                const markers = markersResp.markers || [];
-
-                if (!data || data.length === 0) {
-                    AdminPanel.showToast('No vitals readings to export', 'warning');
-                    return;
-                }
-
-                const headers = ['Participant', 'Recorded At', 'PPG (Heart Rate)', 'GSR (Skin Conductance)', 'Acc X', 'Acc Y', 'Acc Z'];
-                const rows = data.map(r => [
-                    findLabelForTimestamp(r.recorded_at, markers),
-                    r.recorded_at,
-                    r.ppg,
-                    r.gsr,
-                    r.acc_x,
-                    r.acc_y,
-                    r.acc_z
-                ]);
-
-                const csvContent = [headers, ...rows]
-                    .map(row => row.map(cell => `"${String(cell ?? '').replace(/"/g, '""')}"`).join(','))
-                    .join('\n');
-
-                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
-                link.download = `vitals_export_ALL_${userId}_${new Date().toISOString().split('T')[0]}.csv`;
-                link.click();
-
-                AdminPanel.showToast(`Exported ${data.length} readings across ${markers.length || 1} participant(s)`, 'success');
-            } catch (error) {
-                console.error('Error exporting vitals:', error);
-                AdminPanel.showToast('Export failed', 'error');
-            }
-        }
-
-        document.getElementById('export-vitals-btn').addEventListener('click', exportVitalsCSV);
-        document.getElementById('new-participant-btn').addEventListener('click', startNewParticipant);
 
         function loadPPGChart(data) {
             const ctx = document.getElementById('ppgChart').getContext('2d');

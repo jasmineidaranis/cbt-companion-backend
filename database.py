@@ -1106,28 +1106,34 @@ class Database:
             for r in results
         ]
 
-    def create_session_marker(self, user_id: str, label: str) -> dict:
-        """Create a timestamped marker to tag subsequent readings with a participant label."""
-        import uuid
-        marker_id = str(uuid.uuid4())
-        self.conn.execute(
-            "INSERT INTO session_markers (id, user_id, label) VALUES (?, ?, ?)",
-            (marker_id, user_id, label)
-        )
-        self.conn.commit()
-        result = self.conn.execute(
-            "SELECT id, label, created_at FROM session_markers WHERE id = ?",
-            (marker_id,)
-        ).fetchone()
-        return {"id": result[0], "label": result[1], "created_at": result[2]}
-
-    def get_session_markers(self, user_id: str) -> list:
-        """Get all participant-session markers for a user, oldest first."""
+    def get_all_wearable_readings(self) -> list:
+        """
+        Get every wearable reading across ALL users, joined with their account
+        info (name, email), for the global 'Export Readings CSV' feature.
+        Each participant already has their own login (per the sign-up flow),
+        so their own user_id naturally separates their data - no manual
+        per-session labeling needed.
+        """
         results = self.conn.execute(
-            "SELECT id, label, created_at FROM session_markers WHERE user_id = ? ORDER BY created_at ASC",
-            (user_id,)
+            """SELECT u.name, u.email, w.recorded_at, w.ppg, w.gsr, w.acc_x, w.acc_y, w.acc_z
+               FROM wearable_data w
+               JOIN users u ON u.id = w.user_id
+               ORDER BY u.email ASC, w.recorded_at ASC"""
         ).fetchall()
-        return [{"id": r[0], "label": r[1], "created_at": r[2]} for r in results]
+
+        return [
+            {
+                "name": r[0],
+                "email": r[1],
+                "recorded_at": r[2],
+                "ppg": r[3],
+                "gsr": r[4],
+                "acc_x": r[5],
+                "acc_y": r[6],
+                "acc_z": r[7],
+            }
+            for r in results
+        ]
 
     def get_daily_session_counts(self, days: int = 30) -> list:
         """Get daily session counts for trend chart."""

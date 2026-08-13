@@ -28,6 +28,7 @@ Architecture (matches training code exactly):
 
 import warnings
 import io
+import os
 import numpy as np
 import torch
 import torch.nn as nn
@@ -152,9 +153,21 @@ class ModelSingleton:
             self._model.eval()
 
             self._scaler    = checkpoint["scaler"]
-            self._threshold = float(checkpoint["threshold"])
+            base_threshold  = float(checkpoint["threshold"])
 
-            print(f"[ML] TCN_Transformer_AE loaded on {self._device} | threshold={self._threshold:.6f}")
+            # The trained model's threshold was calibrated on different data than
+            # this specific device produces. Real calm/resting readings from this
+            # wearable consistently show recon_error ~0.035-0.085, well above the
+            # original threshold (~0.0206) - causing false HIGH_STRESS alerts even
+            # when the wearer is calm. THRESHOLD_MULTIPLIER lets us recalibrate
+            # without retraining, by scaling the threshold up to match this
+            # device's real baseline. Adjust via env var without a code change.
+            multiplier = float(os.environ.get("THRESHOLD_MULTIPLIER", "3.5"))
+            self._threshold = base_threshold * multiplier
+
+            print(f"[ML] TCN_Transformer_AE loaded on {self._device} | "
+                  f"base_threshold={base_threshold:.6f} x{multiplier} = "
+                  f"threshold={self._threshold:.6f}")
             return self._model
 
         except Exception as e:

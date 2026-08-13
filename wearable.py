@@ -268,11 +268,16 @@ def run_ml_inference_and_alert(user_id: str, record_id: str, db):
             if risk_level == 2:
                 user = db.get_user_by_id(user_id)
                 if user:
+                    # crisis_flags.session_id has a FOREIGN KEY to sessions(id) and is
+                    # required. This is a wearable-triggered event, not a chat session,
+                    # so create a lightweight session record to satisfy that constraint
+                    # instead of using a fake string that doesn't exist in `sessions`.
+                    wearable_session_id = db.create_session(user_id)
                     db.flag_crisis(
                         user_id=user_id,
                         user_name=user.get("name", "Unknown"),
                         user_email=user.get("email", ""),
-                        session_id="wearable_ml_detection",
+                        session_id=wearable_session_id,
                         message_content=f"ML detected HIGH STRESS: {prediction} ({confidence:.2%})",
                         trigger_word="HIGH_STRESS_ML"
                     )
