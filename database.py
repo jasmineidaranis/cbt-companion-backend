@@ -1106,33 +1106,85 @@ class Database:
             for r in results
         ]
 
+    def create_session_marker(self, user_id: str, label: str) -> dict:
+        """Create a timestamped marker to tag subsequent readings with a participant label.
+        Used because the physical wearable always sends data under one fixed account
+        (no firmware access to change this), so we label who was actually wearing it
+        at the software level instead."""
+        import uuid
+        marker_id = str(uuid.uuid4())
+        self.conn.execute(
+            "INSERT INTO session_markers (id, user_id, label) VALUES (?, ?, ?)",
+            (marker_id, user_id, label)
+        )
+        self.conn.commit()
+        result = self.conn.execute(
+            "SELECT id, label, created_at FROM session_markers WHERE id = ?",
+            (marker_id,)
+        ).fetchone()
+        return {"id": result[0], "label": result[1], "created_at": result[2]}
+
+    def get_session_markers(self, user_id: str) -> list:
+        """Get all participant-session markers for a user, oldest first."""
+        results = self.conn.execute(
+            "SELECT id, label, created_at FROM session_markers WHERE user_id = ? ORDER BY created_at ASC",
+            (user_id,)
+        ).fetchall()
+        return [{"id": r[0], "label": r[1], "created_at": r[2]} for r in results]
+
     def get_all_wearable_readings(self) -> list:
         """
-        Get every wearable reading across ALL users, joined with their account
-        info (name, email), for the global 'Export Readings CSV' feature.
-        Each participant already has their own login (per the sign-up flow),
-        so their own user_id naturally separates their data - no manual
-        per-session labeling needed.
+        Get every wearable reading across ALL users, with a computed
+        'participant' label for the global 'Export Sensor Readings CSV' button.
+
+        Since the physical wearable always sends data under one fixed account
+        (no firmware/BLE access to reassign it), the real participant identity
+        comes from session_markers (set via 'Start New Participant') rather
+        than the account name. For each reading, we use whichever marker was
+        most recently created at or before that reading's timestamp, for that
+        same user_id. If no marker exists yet for a user, we fall back to
+        their account name so the column is never blank.
         """
-        results = self.conn.execute(
-            """SELECT u.name, u.email, w.recorded_at, w.ppg, w.gsr, w.acc_x, w.acc_y, w.acc_z
+        readings = self.conn.execute(
+            """SELECT u.id, u.name, u.email, w.recorded_at, w.ppg, w.gsr, w.acc_x, w.acc_y, w.acc_z
                FROM wearable_data w
                JOIN users u ON u.id = w.user_id
                ORDER BY u.email ASC, w.recorded_at ASC"""
         ).fetchall()
 
+        markers = self.conn.execute(
+            "SELECT user_id, label, created_at FROM session_markers ORDER BY user_id ASC, created_at ASC"
+        ).fetchall()
+
+        # Group markers by user_id for fast lookup
+        markers_by_user = {}
+        for user_id, label, created_at in markers:
+            markers_by_user.setdefault(user_id, []).append((created_at, label))
+
+        def participant_label(user_id, account_name, recorded_at):
+            user_markers = markers_by_user.get(user_id)
+            if not user_markers:
+                return account_name  # no markers set yet for this account
+            label = account_name
+            for created_at, marker_label in user_markers:
+                if created_at <= recorded_at:
+                    label = marker_label
+                else:
+                    break
+            return label
+
         return [
             {
-                "name": r[0],
-                "email": r[1],
-                "recorded_at": r[2],
-                "ppg": r[3],
-                "gsr": r[4],
-                "acc_x": r[5],
-                "acc_y": r[6],
-                "acc_z": r[7],
+                "participant": participant_label(r[0], r[1], r[3]),
+                "account_email": r[2],
+                "recorded_at": r[3],
+                "ppg": r[4],
+                "gsr": r[5],
+                "acc_x": r[6],
+                "acc_y": r[7],
+                "acc_z": r[8],
             }
-            for r in results
+            for r in readings
         ]
 
     def get_daily_session_counts(self, days: int = 30) -> list:
