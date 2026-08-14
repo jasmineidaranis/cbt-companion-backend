@@ -567,10 +567,10 @@
                     return;
                 }
 
-                const headers = ['Name', 'Email', 'Recorded At', 'PPG (Heart Rate)', 'GSR (Skin Conductance)', 'Acc X', 'Acc Y', 'Acc Z'];
+                const headers = ['Participant', 'Account Email', 'Recorded At', 'PPG (Heart Rate)', 'GSR (Skin Conductance)', 'Acc X', 'Acc Y', 'Acc Z'];
                 const rows = readings.map(r => [
-                    r.name,
-                    r.email,
+                    r.participant,
+                    r.account_email,
                     r.recorded_at,
                     r.ppg,
                     r.gsr,
