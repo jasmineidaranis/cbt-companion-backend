@@ -191,6 +191,21 @@ def export_all_readings():
     return jsonify({'readings': readings})
 
 
+@admin_bp.route('/api/resolve-episode/<user_id>', methods=['POST'])
+@admin_required
+def resolve_episode(user_id):
+    """Manually clear a patient's active HIGH_STRESS episode, instead of
+    waiting for 5 consecutive NORMAL readings to close it automatically.
+    Useful for testing/calibration when the episode was opened by a false
+    positive before a threshold fix."""
+    db = get_db()
+    active_episode = db.get_active_depression_episode(user_id)
+    if not active_episode:
+        return jsonify({'message': 'No active episode to resolve'}), 200
+    db.end_depression_episode(active_episode['id'])
+    return jsonify({'message': 'Episode resolved', 'episode_id': active_episode['id']})
+
+
 @admin_bp.route('/api/charts/mood/<user_id>')
 @admin_required
 def get_mood_chart_data(user_id):

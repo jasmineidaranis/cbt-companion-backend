@@ -324,7 +324,7 @@ def receive_sensor_data():
         user = request.current_user
         db = get_db()
 
-        data = request.json
+        data = request.get_json(silent=True)
 
         if not data:
             return jsonify({"error": "No data provided"}), 400
@@ -414,7 +414,7 @@ def receive_batch_data():
         user = request.current_user
         db = get_db()
 
-        data = request.json
+        data = request.get_json(silent=True) or {}
         readings = data.get("readings", [])
 
         if not readings:
@@ -611,7 +611,7 @@ def register_device():
         user = request.current_user
         db = get_db()
 
-        data = request.json or {}
+        data = request.get_json(silent=True) or {}
         device_name = data.get("device_name", "ESP32 Wearable")
 
         # Limit to 5 active devices per user
@@ -716,7 +716,7 @@ def receive_device_data():
         if not user:
             return jsonify({"error": "Invalid or revoked device key"}), 401
 
-        data = request.json
+        data = request.get_json(silent=True)
 
         if not data:
             return jsonify({"error": "No data provided"}), 400
@@ -879,7 +879,7 @@ def acknowledge_alerts():
         user = request.current_user
         db = get_db()
 
-        data = request.json or {}
+        data = request.get_json(silent=True) or {}
         alert_id = data.get("alert_id")
 
         if alert_id:
@@ -998,7 +998,7 @@ def receive_device_batch():
         if not user:
             return jsonify({"error": "Invalid or revoked device key"}), 401
 
-        data = request.json
+        data = request.get_json(silent=True) or {}
         readings = data.get("readings", [])
 
         if not readings:

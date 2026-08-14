@@ -122,6 +122,9 @@
                                 <div class="flex items-center space-x-2">
                                     <h2 id="patient-name" class="text-2xl font-bold text-gray-800">Loading...</h2>
                                     <span id="risk-badge" class="hidden px-2 py-0.5 text-xs font-semibold rounded-full"></span>
+                                    <button id="resolve-episode-btn" class="hidden px-2 py-0.5 text-xs font-semibold rounded-full bg-gray-200 hover:bg-gray-300 text-gray-700 transition-colors">
+                                        Resolve Alert
+                                    </button>
                                 </div>
                                 <p id="patient-email" class="text-gray-500">loading@example.com</p>
                                 <p id="patient-member-since" class="text-sm text-gray-400 mt-1">Member since --</p>
@@ -420,6 +423,7 @@
                 const depStats = patientData.depression_stats || {};
                 const activeEp = patientData.recent_episodes?.find(e => e.is_active);
                 const badge = document.getElementById('risk-badge');
+                const resolveBtn = document.getElementById('resolve-episode-btn');
                 if (activeEp) {
                     const peakRisk = activeEp.peak_risk_level ?? 1;
                     if (peakRisk >= 2) {
@@ -430,8 +434,11 @@
                         badge.className = 'px-2 py-0.5 text-xs font-semibold rounded-full bg-orange-100 text-orange-700';
                     }
                     badge.classList.remove('hidden');
+                    resolveBtn.classList.remove('hidden');
                     // Highlight header card border
                     document.getElementById('patient-header-card').classList.add('border-l-4', peakRisk >= 2 ? 'border-red-400' : 'border-orange-400');
+                } else {
+                    resolveBtn.classList.add('hidden');
                 }
 
                 // Show content
@@ -911,6 +918,19 @@
         }
 
         function setupEventListeners() {
+            // Resolve stuck alert
+            document.getElementById('resolve-episode-btn').addEventListener('click', async () => {
+                if (!confirm('Clear this High Stress alert now, without waiting for 5 normal readings?')) return;
+                try {
+                    await AdminPanel.fetchAPI(`/admin/api/resolve-episode/${userId}`, { method: 'POST' });
+                    AdminPanel.showToast('Alert resolved', 'success');
+                    loadPatientData();
+                } catch (error) {
+                    console.error('Error resolving episode:', error);
+                    AdminPanel.showToast('Failed to resolve alert', 'error');
+                }
+            });
+
             // Tab switching
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
