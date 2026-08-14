@@ -149,6 +149,11 @@ def get_patient_detail(user_id):
     # Add recent depression episodes
     patient['recent_episodes'] = db.get_all_depression_episodes(user_id, limit=10)
 
+    # Add the single most recent ML prediction, so we can always show a
+    # current status (Normal / Mild / High) even when there's no active episode
+    latest_predictions = db.get_window_predictions(user_id, limit=1)
+    patient['latest_prediction'] = latest_predictions[-1] if latest_predictions else None
+
     return jsonify(patient)
 
 
@@ -189,6 +194,31 @@ def export_all_readings():
     db = get_db()
     readings = db.get_all_wearable_readings()
     return jsonify({'readings': readings})
+
+
+@admin_bp.route('/api/markers/<user_id>', methods=['POST'])
+@admin_required
+def create_participant_marker(user_id):
+    """Tag the start of a new participant's session. Since the physical
+    wearable always sends data under one fixed account (no firmware/BLE
+    access to change this), we label who was actually wearing it here,
+    at the software level, instead."""
+    body = request.get_json(silent=True) or {}
+    label = (body.get('label') or '').strip()
+    if not label:
+        return jsonify({'error': 'label is required'}), 400
+    db = get_db()
+    marker = db.create_session_marker(user_id, label)
+    return jsonify({'marker': marker})
+
+
+@admin_bp.route('/api/markers/<user_id>', methods=['GET'])
+@admin_required
+def list_participant_markers(user_id):
+    """List all participant-session markers for this user, oldest first."""
+    db = get_db()
+    markers = db.get_session_markers(user_id)
+    return jsonify({'markers': markers})
 
 
 @admin_bp.route('/api/resolve-episode/<user_id>', methods=['POST'])
