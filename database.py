@@ -1146,7 +1146,7 @@ class Database:
         their account name so the column is never blank.
         """
         readings = self.conn.execute(
-            """SELECT u.id, u.name, u.email, w.recorded_at, w.ppg, w.gsr, w.acc_x, w.acc_y, w.acc_z
+            """SELECT u.id, u.name, u.email, w.recorded_at, w.ppg, w.gsr, w.acc_x, w.acc_y, w.acc_z, w.device_timestamp
                FROM wearable_data w
                JOIN users u ON u.id = w.user_id
                ORDER BY u.email ASC, w.recorded_at ASC"""
@@ -1178,6 +1178,7 @@ class Database:
                 "participant": participant_label(r[0], r[1], r[3]),
                 "account_email": r[2],
                 "recorded_at": r[3],
+                "device_timestamp": r[9],
                 "ppg": r[4],
                 "gsr": r[5],
                 "acc_x": r[6],

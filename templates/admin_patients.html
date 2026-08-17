@@ -567,11 +567,12 @@
                     return;
                 }
 
-                const headers = ['Participant', 'Account Email', 'Recorded At', 'PPG (Heart Rate)', 'GSR (Skin Conductance)', 'Acc X', 'Acc Y', 'Acc Z'];
+                const headers = ['Participant', 'Account Email', 'Recorded At (Server)', 'Device Timestamp', 'PPG (Heart Rate)', 'GSR (Skin Conductance)', 'Acc X', 'Acc Y', 'Acc Z'];
                 const rows = readings.map(r => [
                     r.participant,
                     r.account_email,
                     r.recorded_at,
+                    r.device_timestamp,
                     r.ppg,
                     r.gsr,
                     r.acc_x,
