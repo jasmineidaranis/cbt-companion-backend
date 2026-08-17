@@ -338,18 +338,34 @@ def predict_risk(raw_readings):
             recon = model(x)
             error = torch.mean((recon - x) ** 2).item()
 
-        high_risk  = error > threshold
-        risk_level = 2 if high_risk else 0
-        prediction = "HIGH_RISK" if high_risk else "NORMAL"
+        # 3-tier risk system based on how far the reconstruction error is
+        # past the threshold, not just a binary over/under check. This was
+        # previously binary (0 or 2 only), even though the rest of the app
+        # (UI badges, episode tracking) expects a real "Mild Stress" (1)
+        # tier in between - that tier never actually triggered before this fix.
+        if error <= threshold:
+            risk_level = 0
+            prediction = "NORMAL"
+        elif error <= threshold * 1.5:
+            risk_level = 1
+            prediction = "MILD_RISK"
+        else:
+            risk_level = 2
+            prediction = "HIGH_RISK"
 
-        if high_risk:
+        high_risk = risk_level == 2
+
+        if risk_level == 2:
             confidence = min(1.0, error / (2 * threshold))
+        elif risk_level == 1:
+            confidence = min(1.0, (error - threshold) / (0.5 * threshold))
         else:
             confidence = min(1.0, 1.0 - error / threshold)
         confidence = max(0.0, round(confidence, 3))
 
         messages = {
             0: "User appears to be in normal mental state",
+            1: "Mild stress/depression signs detected - keep monitoring",
             2: "Elevated stress/depression risk detected - monitoring recommended"
         }
 
