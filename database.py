@@ -1108,21 +1108,19 @@ class Database:
 
     def create_session_marker(self, user_id: str, label: str) -> dict:
         """Create a timestamped marker to tag subsequent readings with a participant label.
-        Used because the physical wearable always sends data under one fixed account
-        (no firmware access to change this), so we label who was actually wearing it
-        at the software level instead."""
+        Uses ist_now() explicitly to match wearable_data.recorded_at's timezone (IST) -
+        using the DB's default CURRENT_TIMESTAMP (UTC) here caused markers to appear
+        ~5.5 hours "earlier" than same-day readings, retroactively relabeling everyone
+        who tested that day with whichever name was entered most recently."""
         import uuid
         marker_id = str(uuid.uuid4())
+        now = ist_now()
         self.conn.execute(
-            "INSERT INTO session_markers (id, user_id, label) VALUES (?, ?, ?)",
-            (marker_id, user_id, label)
+            "INSERT INTO session_markers (id, user_id, label, created_at) VALUES (?, ?, ?, ?)",
+            (marker_id, user_id, label, now)
         )
         self.conn.commit()
-        result = self.conn.execute(
-            "SELECT id, label, created_at FROM session_markers WHERE id = ?",
-            (marker_id,)
-        ).fetchone()
-        return {"id": result[0], "label": result[1], "created_at": result[2]}
+        return {"id": marker_id, "label": label, "created_at": now}
 
     def get_session_markers(self, user_id: str) -> list:
         """Get all participant-session markers for a user, oldest first."""
